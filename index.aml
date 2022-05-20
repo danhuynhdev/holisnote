@@ -2,5 +2,5 @@
 //--------------------------------------------
 
 // Add a dataset named "ecommerce_details" in "ecommerce.dataset.aml" file to "index.aml" file
-import './act.dataset.aml' { act }
+import './act.dataset.aml' { act as act_1 }
 import './act.dataset.aml' { act as act_2 }
