@@ -1,0 +1,99 @@
+Model public_activities {
+  type: 'table'
+  label: 'Activities'
+  description: ''
+  data_source_name: 'development'
+  dimension ip {
+    label: 'Ip'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.ip }};;
+  }
+  dimension trackable_name {
+    label: 'Trackable Name'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.trackable_name }};;
+  }
+  dimension updated_at {
+    label: 'Updated At'
+    type: 'datetime'
+    hidden: false
+    definition: @sql {{ #SOURCE.updated_at }};;
+  }
+  dimension created_at {
+    label: 'Created At'
+    type: 'datetime'
+    hidden: false
+    definition: @sql {{ #SOURCE.created_at }};;
+  }
+  dimension recipient_type {
+    label: 'Recipient Type'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.recipient_type }};;
+  }
+  dimension recipient_id {
+    label: 'Recipient Id'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.recipient_id }};;
+  }
+  dimension parameters {
+    label: 'Parameters'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.parameters }};;
+  }
+  dimension trackable_id {
+    label: 'Trackable Id'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.trackable_id }};;
+  }
+  dimension key {
+    label: 'Key'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.key }};;
+  }
+  dimension id {
+    label: 'Id'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.id }};;
+  }
+  dimension owner_type {
+    label: 'Owner Type'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.owner_type }};;
+  }
+  dimension owner_id {
+    label: 'Owner Id'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.owner_id }};;
+  }
+  dimension trackable_type {
+    label: 'Trackable Type'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.trackable_type }};;
+  }
+  dimension impersonator_id {
+    label: 'Impersonator Id'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.impersonator_id }};;
+  }
+  dimension tenant_id {
+    label: 'Tenant Id'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.tenant_id }};;
+  }
+
+  owner: 'admin@domain.com'
+  table_name: '"public"."activities"'
+}
