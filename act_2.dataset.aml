@@ -1,0 +1,15 @@
+import './public_activities.model.aml' {
+  public_activities as model__public_activities
+}
+
+Dataset act_2 {
+  label: 'Act 2'
+  description: ''
+  data_source_name: 'development'
+  models: [
+    model__public_activities
+  ]
+  relationships: [
+  ]
+  owner: 'admin@domain.com'
+}
