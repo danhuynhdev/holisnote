@@ -1,0 +1,39 @@
+Model dates_model {
+  type: 'query'
+  label: 'dates_model'
+  description: ''
+  data_source_name: 'demodb'
+
+  dimension date_d {
+    label: 'Date D'
+    type: 'datetime'
+    hidden: false
+    definition: @sql {{ #SOURCE.date_d }};;
+  }
+
+  measure min_date {
+    label: 'min date'
+    type: 'datetime'
+    definition: @sql {{ #SOURCE.date_d }};;
+    aggregation_type: 'min'
+  }
+
+  measure max_date {
+    label: 'max date'
+    type: 'datetime'
+    definition: @sql {{ #SOURCE.date_d }};;
+    aggregation_type: 'max'
+  }
+
+  owner: 'tan.huynh@holistics.io'
+  query: @sql
+    SELECT
+      *
+    FROM generate_series (
+      '2017-01-01'::date,
+      '2025-01-01'::date,
+      '1 day'::interval
+    ) date_d;;
+  models: [
+  ]
+}

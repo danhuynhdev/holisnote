@@ -1,15 +1,13 @@
 import './public_activities.model.aml' {
   public_activities as model__public_activities
 }
-import './dates_model.model.aml' {dates_model}
 
-Dataset act {
-  label: 'Act'
+Dataset act_3 {
+  label: 'Act 3'
   description: ''
   data_source_name: 'development'
   models: [
-    model__public_activities,
-    dates_model,
+    model__public_activities
   ]
   relationships: [
   ]
