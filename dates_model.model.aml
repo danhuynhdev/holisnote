@@ -31,9 +31,18 @@ Model dates_model {
       *
     FROM generate_series (
       '2017-01-01'::date,
+      '2024-01-01'::date,
+      '2 day'::interval
+    ) date_d
+    UNION
+    SELECT
+      *
+    FROM generate_series (
+      '2024-01-01'::date,
       '2025-01-01'::date,
       '1 day'::interval
-    ) date_d;;
+    ) date_d
+  ;;
   models: [
   ]
 }
