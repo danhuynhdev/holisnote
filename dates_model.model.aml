@@ -18,12 +18,12 @@ Model dates_model {
     aggregation_type: 'min'
   }
 
-  measure max_date {
-    label: 'max date'
-    type: 'datetime'
-    definition: @sql {{ #SOURCE.date_d }};;
-    aggregation_type: 'max'
-  }
+  // measure max_date {
+  //   label: 'max date'
+  //   type: 'datetime'
+  //   definition: @sql {{ #SOURCE.date_d }};;
+  //   aggregation_type: 'max'
+  // }
 
   owner: 'tan.huynh@holistics.io'
   query: @sql
