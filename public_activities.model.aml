@@ -91,7 +91,7 @@ Model public_activities {
     label: 'Tenant Id'
     type: 'number'
     hidden: false
-    definition: @sql {{ #SOURCE.tenant_id }};;
+    definition: @sql {{ #SOURCE.tenant_id }} + 1;;
   }
 
   owner: 'admin@domain.com'

@@ -2,7 +2,7 @@ Model dates_model {
   type: 'query'
   label: 'dates_model'
   description: ''
-  data_source_name: 'demodb'
+  data_source_name: 'development'
 
   dimension date_d {
     label: 'Date D'
