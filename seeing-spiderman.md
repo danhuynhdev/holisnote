@@ -15,9 +15,8 @@ Interesting hypothesis, let's take a looksy at the data, shall we?
 I pulled the domestic box office data from [the-numbers.com](https://www.the-numbers.com/movies/custom-comparisons/Spider-Man-No-Way-Home-(2021)#tab=day_by_day_comparison)
 and put them in `spiderman.csv` (if you want to code along, you can do the same!
 My .csv has two columns: `date` and `domestic_box_office`) and US COVID-19 cases
-from the [NY Times GitHub repository](https://github.com/nytimes/covid-19-data).
+from the [NY Times GitHub repository](https://github.com/nytimes/covid-19-data). 
 Here's a little code-along.
-
 
 ```aml
 Model dates_model {

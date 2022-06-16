@@ -26,14 +26,15 @@ Model public_anime_titles {
     type: 'text'
     description: 'human readable version of {{ type }}'
     definition: @sql 
-      CASE(
-        WHEN {{ #SOURCE.type }} = 1 THEN 'primary'
-        WHEN {{ #SOURCE.type }} = 2 THEN 'synonyms'
-        WHEN {{ #SOURCE.type }} = 3 THEN 'shorttitles'
-        WHEN {{ #SOURCE.type }} = 4
-      )
+      CASE
+        WHEN {{ #SOURCE.type }} = '1' THEN 'primary'
+        WHEN {{ #SOURCE.type }} = '2' THEN 'synonyms'
+        WHEN {{ #SOURCE.type }} = '3' THEN 'shorttitles'
+        WHEN {{ #SOURCE.type }} = '4' THEN 'official'
+      END
     ;;
   }
+
   dimension language {
     label: 'Language'
     type: 'text'
@@ -47,6 +48,13 @@ Model public_anime_titles {
     hidden: false
     definition: @sql {{ #SOURCE.title }};;
   }
+
+  dimension tilte_length {
+    label: 'Title length'
+    type: 'number'
+    definition: @sql char_length({{ title }});;
+  }
+
 
   owner: 'admin@domain.com'
   table_name: '"public"."anime_titles"'

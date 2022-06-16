@@ -1,0 +1,17 @@
+import './public_anime_titles.model.aml' {
+  public_anime_titles as model__public_anime_titles
+}
+import './public_myanimelist.model.aml' {public_myanimelist}
+
+Dataset anime_dataset {
+  label: 'Anime Dataset'
+  description: ''
+  data_source_name: 'development'
+  models: [
+    model__public_anime_titles,
+    public_myanimelist
+  ]
+  relationships: [
+  ]
+  owner: 'admin@domain.com'
+}
