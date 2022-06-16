@@ -6,18 +6,99 @@ description: |
 
 # Are anime titles getting longer?
 
-```aml
-// Get unique primary title
-
-// Anime by origin
-
-// top 25 anime
-```
 
 [AniDB](https://anidb.net/) is a website that hosts extensive information on
-anime from China, Japan and Korea. There are currently information on **`r
-comma(nrow(db))` anime** of which `r
-percent(anime_origin["JP"]/sum(anime_origin))` originated from Japan.
+anime from China, Japan and Korea. 
+```aml
+// Download this dataset and import with data modeling import to anime_title table
+// https://file.io/qEUZCtQfXUou
+
+Model public_anime_titles {
+  type: 'table'
+  label: 'Anime Titles'
+  description: ''
+  data_source_name: 'development'
+  dimension aid {
+    label: 'Aid'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.aid }};;
+  }
+  dimension type {
+    label: 'Type'
+    type: 'text'
+    hidden: false
+    description: '''
+      type: 1=primary title (one per anime), 2=synonyms (multiple per anime), 3=shorttitles (multiple per anime), 4=official title (one per language)
+    '''
+    definition: @sql {{ #SOURCE.type }};;
+  }
+  dimension title_type {
+    label: 'Title Type'
+    type: 'text'
+    description: 'human readable version of {{ type }}'
+    definition: @sql 
+      CASE
+        WHEN {{ #SOURCE.type }} = '1' THEN 'primary'
+        WHEN {{ #SOURCE.type }} = '2' THEN 'synonyms'
+        WHEN {{ #SOURCE.type }} = '3' THEN 'shorttitles'
+        WHEN {{ #SOURCE.type }} = '4' THEN 'official'
+      END
+    ;;
+  }
+
+  dimension language {
+    label: 'Language'
+    type: 'text'
+    hidden: false
+    
+    definition: @sql {{ #SOURCE.language }};;
+  }
+  dimension title {
+    label: 'Title'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.title }};;
+  }
+
+  dimension tilte_length {
+    label: 'Title length'
+    type: 'number'
+    definition: @sql char_length({{ title }});;
+  }
+
+
+  owner: 'admin@domain.com'
+  table_name: '"public"."anime_titles"'
+}
+```
+
+```aml
+Dataset anime_dataset {
+  label: 'Anime Dataset'
+  description: ''
+  data_source_name: 'development'
+  models: [
+    model__public_anime_titles,
+    public_myanimelist
+  ]
+  relationships: [
+  ]
+  owner: 'admin@domain.com'
+}
+
+```
+
+There are currently information on ** ... anime** 
+```aml
+// Count unique primary title
+```
+
+of which ... originated from Japan.
+
+```aml
+// percent of ja vs all
+```
 
 As an anime lover, I've watched over 700 anime (which is still less than 5% in
 the whole database!) but one thing I noticed over recent years is that some
@@ -35,16 +116,16 @@ First note that anime titles come in many forms.  For example,
 
 In the following explorations, I use the primary title. 
 
-Figure \@ref(fig:title-length-distribution) shows that the distribution of the
-primary title length. We can see that most anime titles are less than 70
-characters but there are some Japanese anime title that are double this length.
-The top 25 animes have title length greater than `r dbl$ntitle[nrow(dbl)]`
+The following chart shows that the distribution of the primary title length. We can see 
+that most anime titles are less than 70 characters but there are some Japanese anime title 
+that are double this length. The top 25 animes have title length greater than `r dbl$ntitle[nrow(dbl)]`
 characters.
 
 ```aml
 // Count number of anime by title length with legend is country
 @viz
 {
+    "data_set_id": "anime_dataset",
     "viz_type": "column_chart",
     "fields": {
         "x_axis": {
@@ -193,7 +274,6 @@ characters.
 }
 ;;
 ```
-![image](https://user-images.githubusercontent.com/17341000/174016396-de43829f-bbdc-4229-9370-455bc8961c6c.png)
 
 The five longest titles from longest to shortest are: 
 
@@ -201,6 +281,7 @@ The five longest titles from longest to shortest are:
 // Top 5 Title
 @viz
 {
+    "data_set_id": "anime_dataset",
     "viz_type": "data_table",
     "fields": {
         "table_fields": [
@@ -301,16 +382,126 @@ The five longest titles from longest to shortest are:
 
 Because of AniDB's limit on API call (multiple requests can get you banned
 easily -- turns out that the limit is quite small; about 13-14 calls already got
-me banned...), I'm going to just study the top 25 anime in terms of title
-length.
+me banned...), I'm going to use myanimelist for this.
+```aml
+// import with https://file.io/7M3oFxvfUuZf
+// choose number of uid
 
-Figure \@ref(fig:release-date) suggest that super long titles are more common in
-the last decade than in the past. But the analysis is only based on top 25 anime
-with the longest titles so it could benefit from more extensive study.
+Model public_myanimelist {
+  type: 'table'
+  label: 'Myanimelist'
+  description: ''
+  data_source_name: 'development'
+  dimension uid {
+    label: 'Uid'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.uid }};;
+  }
+  dimension title {
+    label: 'Title'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.title }};;
+  }
+
+  dimension title_length {
+    label: 'Title Length'
+    type: 'number'
+    hidden: false
+    definition: @sql char_length({{ title }});;
+  }
+
+  dimension synopsis {
+    label: 'Synopsis'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.synopsis }};;
+  }
+  dimension genre {
+    label: 'Genre'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.genre }};;
+  }
+  dimension aired {
+    label: 'Aired'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.aired }};;
+  }
+  dimension aired_date {
+    label: 'Aired Date'
+    type: 'date'
+    hidden: false
+    definition: @sql 
+      CASE 
+        WHEN {{ #SOURCE.aired_date }} = '' THEN NULL
+        ELSE DATE({{ #SOURCE.aired_date }})
+      END
+    ;;
+  }
+  dimension year {
+    label: 'Year'
+    type: 'number'
+    hidden: false
+    definition: @sql DATE_PART('year', {{ aired_date }})::INTEGER ;;
+  }
+  dimension episodes {
+    label: 'Episodes'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.episodes }};;
+  }
+  dimension members {
+    label: 'Members'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.members }};;
+  }
+  dimension popularity {
+    label: 'Popularity'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.popularity }};;
+  }
+  dimension ranked {
+    label: 'Ranked'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.ranked }};;
+  }
+  dimension score {
+    label: 'Score'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.score }};;
+  }
+  dimension img_url {
+    label: 'Img Url'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.img_url }};;
+  }
+  dimension link {
+    label: 'Link'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.link }};;
+  }
+
+  owner: 'admin@domain.com'
+  table_name: '"public"."myanimelist"'
+}
+```
+
+This figure suggest that super long titles are more common in
+the last decade than in the past. 
 
 ```aml
 @viz
 {
+    "data_set_id": "anime_dataset",
     "viz_type": "line_chart",
     "fields": {
         "x_axis": {
@@ -423,4 +614,3 @@ with the longest titles so it could benefit from more extensive study.
 }
 ;;
 ```
-![](https://emitanaka.org/posts/2022-01-16-anime-titles/figures/release-date-1.png)
