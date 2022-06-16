@@ -1,3 +1,6 @@
+// Download this dataset and import with data modeling import to anime_title table
+// https://file.io/qEUZCtQfXUou
+
 Model public_anime_titles {
   type: 'table'
   label: 'Anime Titles'
