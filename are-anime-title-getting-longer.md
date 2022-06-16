@@ -51,7 +51,7 @@ ggplot(db, aes(ntitle)) +
        y = "Count") + 
   facet_grid(origin ~ ., scales = "free_y")
 ```
-![](https://emitanaka.org/posts/2022-01-16-anime-titles/figures/title-length-distribution-1.png)
+![image](https://user-images.githubusercontent.com/17341000/174016396-de43829f-bbdc-4229-9370-455bc8961c6c.png)
 
 The five longest titles from longest to shortest are: 
 

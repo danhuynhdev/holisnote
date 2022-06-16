@@ -69,6 +69,7 @@ Model dates_model {
   ]
 }
 ```
+![image](https://user-images.githubusercontent.com/17341000/173999545-ad885009-4f04-4099-88da-6030e05e6a2b.png)
 
 
 ```r
