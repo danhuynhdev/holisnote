@@ -9,10 +9,12 @@ surge we are seeing in the US is due to people seeing Spider-Man: No Way Home.
 If people would just stop seeing this film, he argues, cases will go back down!
 Interesting hypothesis, let's take a looksy at the data, shall we?
 
-<blockquote class="twitter-tweet"><p lang="en" dir="ltr">And now, a message from President Joe Biden. <a href="https://t.co/Q8TglFNBlF">pic.twitter.com/Q8TglFNBlF</a></p>&mdash; Saturday Night Live - SNL (@nbcsnl) <a href="https://twitter.com/nbcsnl/status/1482574817035444227?ref_src=twsrc%5Etfw">January 16, 2022</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<iframe border=0 frameborder=0 height=550 width=550
+ src="https://twitframe.com/show?url=https://twitter.com/nbcsnl/status/1482574817035444227">
+</iframe>
 
 
-I pulled the domestic box office data from [the-numbers.com](https://www.the-numbers.com/movies/custom-comparisons/Spider-Man-No-Way-Home-(2021)#tab=day_by_day_comparison)
+I pulled the domestic box office data from [the-numbers.com](https://www.the-numbers.com/movies/custom-comparisons/Spider-Man-No-Way-Home-(2021%29)
 and put them in `spiderman.csv` (if you want to code along, you can do the same!
 My .csv has two columns: `date` and `domestic_box_office`) and US COVID-19 cases
 from the [NY Times GitHub repository](https://github.com/nytimes/covid-19-data). 
