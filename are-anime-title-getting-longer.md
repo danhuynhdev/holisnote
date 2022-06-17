@@ -74,19 +74,130 @@ Model public_anime_titles {
 ```
 
 ```aml
+// import with https://file.io/7M3oFxvfUuZf
+// choose number of uid
+
+Model public_myanimelist {
+  type: 'table'
+  label: 'Myanimelist'
+  description: ''
+  data_source_name: 'development'
+  dimension uid {
+    label: 'Uid'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.uid }};;
+  }
+  dimension title {
+    label: 'Title'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.title }};;
+  }
+
+  dimension title_length {
+    label: 'Title Length'
+    type: 'number'
+    hidden: false
+    definition: @sql char_length({{ title }});;
+  }
+
+  dimension synopsis {
+    label: 'Synopsis'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.synopsis }};;
+  }
+  dimension genre {
+    label: 'Genre'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.genre }};;
+  }
+  dimension aired {
+    label: 'Aired'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.aired }};;
+  }
+  dimension aired_date {
+    label: 'Aired Date'
+    type: 'date'
+    hidden: false
+    definition: @sql 
+      CASE 
+        WHEN {{ #SOURCE.aired_date }} = '' THEN NULL
+        ELSE DATE({{ #SOURCE.aired_date }})
+      END
+    ;;
+  }
+  dimension year {
+    label: 'Year'
+    type: 'number'
+    hidden: false
+    definition: @sql DATE_PART('year', {{ aired_date }})::INTEGER ;;
+  }
+  dimension episodes {
+    label: 'Episodes'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.episodes }};;
+  }
+  dimension members {
+    label: 'Members'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.members }};;
+  }
+  dimension popularity {
+    label: 'Popularity'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.popularity }};;
+  }
+  dimension ranked {
+    label: 'Ranked'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.ranked }};;
+  }
+  dimension score {
+    label: 'Score'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.score }};;
+  }
+  dimension img_url {
+    label: 'Img Url'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.img_url }};;
+  }
+  dimension link {
+    label: 'Link'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.link }};;
+  }
+
+  owner: 'admin@domain.com'
+  table_name: '"public"."myanimelist"'
+}
+```
+
+```aml
 Dataset anime_dataset {
   label: 'Anime Dataset'
   description: ''
   data_source_name: 'development'
   models: [
-    model__public_anime_titles,
+    public_anime_titles,
     public_myanimelist
   ]
   relationships: [
   ]
   owner: 'admin@domain.com'
 }
-
 ```
 
 There are currently information on ** ... anime** 
@@ -378,122 +489,12 @@ The five longest titles from longest to shortest are:
     ],
     "adhoc_fields": []
 }
+;;
 ```
 
 Because of AniDB's limit on API call (multiple requests can get you banned
 easily -- turns out that the limit is quite small; about 13-14 calls already got
 me banned...), I'm going to use myanimelist for this.
-```aml
-// import with https://file.io/7M3oFxvfUuZf
-// choose number of uid
-
-Model public_myanimelist {
-  type: 'table'
-  label: 'Myanimelist'
-  description: ''
-  data_source_name: 'development'
-  dimension uid {
-    label: 'Uid'
-    type: 'number'
-    hidden: false
-    definition: @sql {{ #SOURCE.uid }};;
-  }
-  dimension title {
-    label: 'Title'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.title }};;
-  }
-
-  dimension title_length {
-    label: 'Title Length'
-    type: 'number'
-    hidden: false
-    definition: @sql char_length({{ title }});;
-  }
-
-  dimension synopsis {
-    label: 'Synopsis'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.synopsis }};;
-  }
-  dimension genre {
-    label: 'Genre'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.genre }};;
-  }
-  dimension aired {
-    label: 'Aired'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.aired }};;
-  }
-  dimension aired_date {
-    label: 'Aired Date'
-    type: 'date'
-    hidden: false
-    definition: @sql 
-      CASE 
-        WHEN {{ #SOURCE.aired_date }} = '' THEN NULL
-        ELSE DATE({{ #SOURCE.aired_date }})
-      END
-    ;;
-  }
-  dimension year {
-    label: 'Year'
-    type: 'number'
-    hidden: false
-    definition: @sql DATE_PART('year', {{ aired_date }})::INTEGER ;;
-  }
-  dimension episodes {
-    label: 'Episodes'
-    type: 'number'
-    hidden: false
-    definition: @sql {{ #SOURCE.episodes }};;
-  }
-  dimension members {
-    label: 'Members'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.members }};;
-  }
-  dimension popularity {
-    label: 'Popularity'
-    type: 'number'
-    hidden: false
-    definition: @sql {{ #SOURCE.popularity }};;
-  }
-  dimension ranked {
-    label: 'Ranked'
-    type: 'number'
-    hidden: false
-    definition: @sql {{ #SOURCE.ranked }};;
-  }
-  dimension score {
-    label: 'Score'
-    type: 'number'
-    hidden: false
-    definition: @sql {{ #SOURCE.score }};;
-  }
-  dimension img_url {
-    label: 'Img Url'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.img_url }};;
-  }
-  dimension link {
-    label: 'Link'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.link }};;
-  }
-
-  owner: 'admin@domain.com'
-  table_name: '"public"."myanimelist"'
-}
-```
 
 This figure suggest that super long titles are more common in
 the last decade than in the past. 
