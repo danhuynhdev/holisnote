@@ -1,13 +1,13 @@
+---
 title: Are anime title getting longer
 description: A quick exploratory analysis on the length of anime titles.
 author: Emi Tanaka
 publication_date: Jan. 15, 2022
-
+---
 
 [AniDB](https://anidb.net/) is a website that hosts extensive information on
-anime from China, Japan and Korea.
-
-
+anime from China, Japan and Korea. 
+```aml
 // Download this dataset and import with data modeling import to anime_title table
 // https://file.io/qEUZCtQfXUou
 
@@ -69,7 +69,9 @@ Model public_anime_titles {
   owner: 'admin@domain.com'
   table_name: '"public"."anime_titles"'
 }
+```
 
+```aml
 // import with https://file.io/7M3oFxvfUuZf
 // choose number of uid
 
@@ -179,7 +181,9 @@ Model public_myanimelist {
   owner: 'admin@domain.com'
   table_name: '"public"."myanimelist"'
 }
+```
 
+```aml
 Dataset anime_dataset {
   label: 'Anime Dataset'
   description: ''
@@ -192,18 +196,18 @@ Dataset anime_dataset {
   ]
   owner: 'admin@domain.com'
 }
-
+```
 
 There are currently information on ** ... anime** 
-
+```aml
 // Count unique primary title
-
+```
 
 of which ... originated from Japan.
 
-
+```aml
 // percent of ja vs all
-
+```
 
 As an anime lover, I've watched over 700 anime (which is still less than 5% in
 the whole database!) but one thing I noticed over recent years is that some
@@ -226,7 +230,7 @@ that most anime titles are less than 70 characters but there are some Japanese a
 that are double this length. The top 25 animes have title length greater than `r dbl$ntitle[nrow(dbl)]`
 characters.
 
-
+```aml
 // Count number of anime by title length with legend is country
 @viz
 {
@@ -378,11 +382,11 @@ characters.
     "adhoc_fields": []
 }
 ;;
-
+```
 
 The five longest titles from longest to shortest are: 
 
-
+```aml
 // Top 5 Title
 @viz
 {
@@ -484,7 +488,7 @@ The five longest titles from longest to shortest are:
     "adhoc_fields": []
 }
 ;;
-
+```
 
 Because of AniDB's limit on API call (multiple requests can get you banned
 easily -- turns out that the limit is quite small; about 13-14 calls already got
@@ -493,7 +497,7 @@ me banned...), I'm going to use myanimelist for this.
 This figure suggest that super long titles are more common in
 the last decade than in the past. 
 
-
+```aml
 @viz
 {
     "data_set_id": "anime_dataset",
@@ -608,3 +612,4 @@ the last decade than in the past.
     "adhoc_fields": []
 }
 ;;
+```
