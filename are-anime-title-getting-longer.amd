@@ -1,0 +1,615 @@
+---
+title: Are anime title getting longer
+description: A quick exploratory analysis on the length of anime titles.
+author: Emi Tanaka
+publication_date: Jan. 15, 2022
+---
+
+[AniDB](https://anidb.net/) is a website that hosts extensive information on
+anime from China, Japan and Korea. 
+```aml
+// Download this dataset and import with data modeling import to anime_title table
+// https://file.io/qEUZCtQfXUou
+
+Model public_anime_titles {
+  type: 'table'
+  label: 'Anime Titles'
+  description: ''
+  data_source_name: 'development'
+  dimension aid {
+    label: 'Aid'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.aid }};;
+  }
+  dimension type {
+    label: 'Type'
+    type: 'text'
+    hidden: false
+    description: '''
+      type: 1=primary title (one per anime), 2=synonyms (multiple per anime), 3=shorttitles (multiple per anime), 4=official title (one per language)
+    '''
+    definition: @sql {{ #SOURCE.type }};;
+  }
+  dimension title_type {
+    label: 'Title Type'
+    type: 'text'
+    description: 'human readable version of {{ type }}'
+    definition: @sql 
+      CASE
+        WHEN {{ #SOURCE.type }} = '1' THEN 'primary'
+        WHEN {{ #SOURCE.type }} = '2' THEN 'synonyms'
+        WHEN {{ #SOURCE.type }} = '3' THEN 'shorttitles'
+        WHEN {{ #SOURCE.type }} = '4' THEN 'official'
+      END
+    ;;
+  }
+
+  dimension language {
+    label: 'Language'
+    type: 'text'
+    hidden: false
+    
+    definition: @sql {{ #SOURCE.language }};;
+  }
+  dimension title {
+    label: 'Title'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.title }};;
+  }
+
+  dimension tilte_length {
+    label: 'Title length'
+    type: 'number'
+    definition: @sql char_length({{ title }});;
+  }
+
+
+  owner: 'admin@domain.com'
+  table_name: '"public"."anime_titles"'
+}
+```
+
+```aml
+// import with https://file.io/7M3oFxvfUuZf
+// choose number of uid
+
+Model public_myanimelist {
+  type: 'table'
+  label: 'Myanimelist'
+  description: ''
+  data_source_name: 'development'
+  dimension uid {
+    label: 'Uid'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.uid }};;
+  }
+  dimension title {
+    label: 'Title'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.title }};;
+  }
+
+  dimension title_length {
+    label: 'Title Length'
+    type: 'number'
+    hidden: false
+    definition: @sql char_length({{ title }});;
+  }
+
+  dimension synopsis {
+    label: 'Synopsis'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.synopsis }};;
+  }
+  dimension genre {
+    label: 'Genre'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.genre }};;
+  }
+  dimension aired {
+    label: 'Aired'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.aired }};;
+  }
+  dimension aired_date {
+    label: 'Aired Date'
+    type: 'date'
+    hidden: false
+    definition: @sql 
+      CASE 
+        WHEN {{ #SOURCE.aired_date }} = '' THEN NULL
+        ELSE DATE({{ #SOURCE.aired_date }})
+      END
+    ;;
+  }
+  dimension year {
+    label: 'Year'
+    type: 'number'
+    hidden: false
+    definition: @sql DATE_PART('year', {{ aired_date }})::INTEGER ;;
+  }
+  dimension episodes {
+    label: 'Episodes'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.episodes }};;
+  }
+  dimension members {
+    label: 'Members'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.members }};;
+  }
+  dimension popularity {
+    label: 'Popularity'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.popularity }};;
+  }
+  dimension ranked {
+    label: 'Ranked'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.ranked }};;
+  }
+  dimension score {
+    label: 'Score'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.score }};;
+  }
+  dimension img_url {
+    label: 'Img Url'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.img_url }};;
+  }
+  dimension link {
+    label: 'Link'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.link }};;
+  }
+
+  owner: 'admin@domain.com'
+  table_name: '"public"."myanimelist"'
+}
+```
+
+```aml
+Dataset anime_dataset {
+  label: 'Anime Dataset'
+  description: ''
+  data_source_name: 'development'
+  models: [
+    public_anime_titles,
+    public_myanimelist
+  ]
+  relationships: [
+  ]
+  owner: 'admin@domain.com'
+}
+```
+
+There are currently information on ** ... anime** 
+```aml
+// Count unique primary title
+```
+
+of which ... originated from Japan.
+
+```aml
+// percent of ja vs all
+```
+
+As an anime lover, I've watched over 700 anime (which is still less than 5% in
+the whole database!) but one thing I noticed over recent years is that some
+anime titles are bizzarely long... or more like anime titles are becoming
+sentences. To explore this, I decided to use the
+[`anidb`](https://github.com/emitanaka/anidb) R-package to look at the data.
+
+First note that anime titles come in many forms.  For example, 
+
+* "`r db[22,"title_original"]`" is the **Japanese title**,
+* "`r db[22,"title_primary"]`" is the **primary title** (the official title in
+  the country of origin but in romanized form), and
+* "`r db[22,"title_en"]`" is the **English title**. The English title may be
+  unavailable if the anime is not licensed for English audiences.
+
+In the following explorations, I use the primary title. 
+
+The following chart shows that the distribution of the primary title length. We can see 
+that most anime titles are less than 70 characters but there are some Japanese anime title 
+that are double this length. The top 25 animes have title length greater than `r dbl$ntitle[nrow(dbl)]`
+characters.
+
+```aml
+// Count number of anime by title length with legend is country
+@viz
+{
+    "data_set_id": "anime_dataset",
+    "viz_type": "column_chart",
+    "fields": {
+        "x_axis": {
+            "path_hash": {
+                "field_name": "tilte_length",
+                "model_id": "public_anime_titles"
+            },
+            "full_path": null,
+            "transformation": null,
+            "type": "number",
+            "format": {
+                "type": "number",
+                "format": {
+                    "pattern": "inherited"
+                }
+            },
+        },
+        "series": {
+            "path_hash": {
+                "field_name": "language",
+                "model_id": "public_anime_titles"
+            },
+            "type": "text",
+            "transformation": null,
+            "format": {
+                "type": "string",
+                "sub_type": "string"
+            }
+        },
+        "y_axes": [
+            {
+                "columns": [
+                    {
+                        "path_hash": {
+                            "field_name": "aid",
+                            "model_id": "public_anime_titles"
+                        },
+                        "type": "auto",
+                        "aggregation": "count",
+                        "format": {
+                            "type": "number",
+                            "format": {
+                                "pattern": "inherited"
+                            }
+                        },
+                        "color": "auto",
+                        "series_settings": {
+                            "series_hash": {
+                                "ja": {
+                                    "color": "auto",
+                                    "hidden": false
+                                },
+                                "ko": {
+                                    "color": "auto",
+                                    "hidden": false
+                                },
+                                "zh-Hans": {
+                                    "color": "auto",
+                                    "hidden": false
+                                },
+                            },
+                            "palette_id": -2,
+                            "series_type": "auto"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    "settings": {
+        "x_axis": {
+            "title": null
+        },
+        "legend": {
+            "enabled": true,
+            "alignment": "bottom"
+        },
+        "y_axes": [
+            {
+                "title": null,
+                "align": "left",
+                "scale_type": "linear",
+                "min": null,
+                "max": null,
+                "show_data_label": false,
+                "show_series_percentage": false,
+                "stack_series": false,
+                "stack_type": "normal",
+                "show_stack_total": false,
+                "show_group_total": false,
+                "group_long_tail": false,
+                "maximum_groups": 5
+            }
+        ],
+        "misc": {
+            "custom_color_list": [
+                {}
+            ],
+            "pagination_size": 25,
+            "show_row_number": true,
+            "row_limit": -1
+        },
+        "quick_pivot": false,
+        "sort": {},
+        "pop_settings": null,
+        "others": {
+            "include_empty_children_rows": false
+        }
+    },
+    "format": {},
+    "filters": [
+        {
+            "operator": "is",
+            "values": [
+                "ja",
+                "zh-Hans",
+                "ko"
+            ],
+            "modifier": null,
+            "options": null,
+            "path_hash": {
+                "model_id": "public_anime_titles",
+                "field_name": "language"
+            },
+            "aggregation": null,
+            "label": "Adhoc filter",
+            "dynamic_filter_id": null
+        },
+        {
+            "operator": "is",
+            "values": [
+                "official"
+            ],
+            "modifier": null,
+            "options": null,
+            "path_hash": {
+                "model_id": "public_anime_titles",
+                "field_name": "title_type"
+            },
+            "aggregation": null,
+            "label": "Adhoc filter",
+            "dynamic_filter_id": null
+        }
+    ],
+    "adhoc_fields": []
+}
+;;
+```
+
+The five longest titles from longest to shortest are: 
+
+```aml
+// Top 5 Title
+@viz
+{
+    "data_set_id": "anime_dataset",
+    "viz_type": "data_table",
+    "fields": {
+        "table_fields": [
+            {
+                "path_hash": {
+                    "field_name": "title",
+                    "model_id": "public_anime_titles"
+                },
+                "type": "text",
+                "format": {
+                    "type": "string",
+                    "sub_type": "string"
+                }
+            },
+            {
+                "path_hash": {
+                    "field_name": "tilte_length",
+                    "model_id": "public_anime_titles"
+                },
+                "type": "number",
+                "format": {
+                    "type": "number",
+                    "format": {
+                        "pattern": "inherited"
+                    }
+                }
+            }
+        ]
+    },
+    "settings": {
+        "misc": {
+            "custom_color_list": [
+                {}
+            ],
+            "pagination_size": 25,
+            "show_row_number": true,
+            "row_limit": -1
+        },
+        "conditional_formatting": [],
+        "aggregation": {
+            "show_total": false,
+            "show_average": false
+        },
+        "others": {
+            "include_empty_children_rows": false
+        },
+        "quick_pivot": false,
+        "sort": [
+            {
+                "column": 1,
+                "sortOrder": false
+            }
+        ],
+        "pop_settings": null
+    },
+    "format": {},
+    "filters": [
+        {
+            "operator": "is",
+            "values": [
+                "primary"
+            ],
+            "modifier": null,
+            "options": null,
+            "path_hash": {
+                "model_id": "public_anime_titles",
+                "field_name": "title_type"
+            },
+            "aggregation": null,
+            "label": "Adhoc filter",
+            "dynamic_filter_id": null
+        },
+        {
+            "operator": "top",
+            "values": [
+                5
+            ],
+            "modifier": {
+                "logic": "standard",
+                "aggregation": "max",
+                "field_name": "tilte_length",
+                "model_id": "public_anime_titles",
+                "label": "Title length"
+            },
+            "options": null,
+            "path_hash": {
+                "model_id": "public_anime_titles",
+                "field_name": "title"
+            },
+            "aggregation": null,
+            "label": "Adhoc filter",
+            "dynamic_filter_id": null
+        }
+    ],
+    "adhoc_fields": []
+}
+;;
+```
+
+Because of AniDB's limit on API call (multiple requests can get you banned
+easily -- turns out that the limit is quite small; about 13-14 calls already got
+me banned...), I'm going to use myanimelist for this.
+
+This figure suggest that super long titles are more common in
+the last decade than in the past. 
+
+```aml
+@viz
+{
+    "data_set_id": "anime_dataset",
+    "viz_type": "line_chart",
+    "fields": {
+        "x_axis": {
+            "label": "Aired Date",
+            "path_hash": {
+                "field_name": "aired_date",
+                "model_id": "public_myanimelist"
+            },
+            "type": "date",
+            "uuid": "76f9730d-bfac-4c08-b386-8d0ada789f23",
+            "transformation": "datetrunc year",
+            "format": {
+                "type": "date",
+                "sub_type": "yyyy"
+            },
+            "aggregation": null
+        },
+        "series": {
+            "path_hash": null,
+            "format": null,
+            "custom_label": null
+        },
+        "y_axes": [
+            {
+                "columns": [
+                    {
+                        "label": "Title Length",
+                        "path_hash": {
+                            "field_name": "title_length",
+                            "model_id": "public_myanimelist"
+                        },
+                        "type": "auto",
+                        "uuid": "bcc8b03c-2baa-4dd2-9cfc-773a43f25edb",
+                        "aggregation": "max",
+                        "format": {
+                            "type": "number",
+                            "format": {
+                                "pattern": "inherited"
+                            }
+                        },
+                        "color": "auto",
+                        "series_settings": {
+                            "series_hash": {},
+                            "palette_id": -2,
+                            "series_type": "auto"
+                        },
+                        "transformation": null
+                    }
+                ]
+            }
+        ]
+    },
+    "settings": {
+        "x_axis": {
+            "title": null
+        },
+        "legend": {
+            "enabled": true,
+            "alignment": "bottom"
+        },
+        "y_axes": [
+            {
+                "title": null,
+                "align": "left",
+                "scale_type": "linear",
+                "min": null,
+                "max": null,
+                "show_data_label": false,
+                "show_series_percentage": false,
+                "stack_series": false,
+                "stack_type": "normal",
+                "show_stack_total": false,
+                "show_group_total": false,
+                "group_long_tail": false,
+                "maximum_groups": 5
+            }
+        ],
+        "misc": {
+            "custom_color_list": [
+                {}
+            ],
+            "pagination_size": 25,
+            "show_row_number": true,
+            "row_limit": -1
+        },
+        "quick_pivot": false,
+        "sort": {},
+        "pop_settings": null,
+        "others": {
+            "include_empty_children_rows": false
+        }
+    },
+    "format": {},
+    "filters": [
+        {
+            "operator": "not_null",
+            "values": [],
+            "modifier": null,
+            "options": null,
+            "path_hash": {
+                "model_id": "public_myanimelist",
+                "field_name": "aired_date"
+            },
+            "aggregation": null,
+            "label": "Adhoc filter",
+            "dynamic_filter_id": null
+        }
+    ],
+    "adhoc_fields": []
+}
+;;
+```
