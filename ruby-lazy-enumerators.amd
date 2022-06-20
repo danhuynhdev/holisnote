@@ -1,10 +1,9 @@
-<!-- ---
-title: "Ruby Lazy Enumerators"
---- -->
-
-# Ruby Lazy Enumerators
+---
+title: Ruby Lazy Enumerator
+---
 
 `Enumerator::Lazy` allows constructing chains of operations without evaluating them immediately, and evaluating values on an as-needed basis.
+
 It redefines most of the Enumerable methods so that they just construct another lazy enumerator.
 
 ## What is an enumerator?
