@@ -219,10 +219,44 @@ sentences. To explore this, I decided to use the
 
 First note that anime titles come in many forms.  For example, 
 
-* "`r db[22,"title_original"]`" is the **Japanese title**,
-* "`r db[22,"title_primary"]`" is the **primary title** (the official title in
+```aml
+Model eva {
+  type: 'query'
+  data_source_name: 'development'
+  query: @sql 
+    select 
+      (select {{ #a.title }} ja_title from {{ #public_anime_titles a }} where {{ #a.aid }} = 22 and {{ #a.title_type }} = 'official' and {{ #a.language }} = 'ja'),
+      (select {{ #a.title }} primary_title from {{ #public_anime_titles a }} where {{ #a.aid }} = 22 and {{ #a.title_type }} = 'primary'),
+      (select {{ #a.title }} en_title from {{ #public_anime_titles a }} where {{ #a.aid }} = 22 and {{ #a.title_type }} = 'official' and {{ #a.language }} = 'en')
+  ;;
+
+  dimension ja_title {
+    label: 'Ja Title'
+    type: 'text'
+    definition: @sql max({{ #SOURCE.ja_title }}) ;;
+  }
+
+  dimension primary_title {
+    label: 'Primary Title'
+    type: 'text'
+    definition: @sql max({{ #SOURCE.primary_title }}) ;;
+  }
+
+  dimension en_title {
+    label: 'En Title'
+    type: 'text'
+    definition: @sql max({{ #SOURCE.en_title }}) ;;
+  }
+
+
+  models: [ public_anime_titles ]
+}
+```
+
+* "`aml max(eva.ja_title)`" is the **Japanese title**,
+* "`r max(eva.primary_title)`" is the **primary title** (the official title in
   the country of origin but in romanized form), and
-* "`r db[22,"title_en"]`" is the **English title**. The English title may be
+* "`r max(eva.en_title)`" is the **English title**. The English title may be
   unavailable if the anime is not licensed for English audiences.
 
 In the following explorations, I use the primary title. 
