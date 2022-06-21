@@ -1,0 +1,33 @@
+import './public_anime_titles.model.aml' { public_anime_titles }
+
+Model eva {
+  type: 'query'
+  data_source_name: 'development'
+  query: @sql 
+    select 
+      (select {{ #a.title }} ja_title from {{ #public_anime_titles a }} where {{ #a.aid }} = 22 and {{ #a.title_type }} = 'official' and {{ #a.language }} = 'ja'),
+      (select {{ #a.title }} primary_title from {{ #public_anime_titles a }} where {{ #a.aid }} = 22 and {{ #a.title_type }} = 'primary'),
+      (select {{ #a.title }} en_title from {{ #public_anime_titles a }} where {{ #a.aid }} = 22 and {{ #a.title_type }} = 'official' and {{ #a.language }} = 'en')
+  ;;
+
+  dimension ja_title {
+    label: 'Ja Title'
+    type: 'text'
+    definition: @sql {{ #SOURCE.ja_title }} ;;
+  }
+
+  dimension primary_title {
+    label: 'Primary Title'
+    type: 'text'
+    definition: @sql {{ #SOURCE.primary_title }} ;;
+  }
+
+  dimension en_title {
+    label: 'En Title'
+    type: 'text'
+    definition: @sql {{ #SOURCE.en_title }} ;;
+  }
+
+
+  models: [ public_anime_titles ]
+}

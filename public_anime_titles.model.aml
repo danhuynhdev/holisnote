@@ -55,6 +55,28 @@ Model public_anime_titles {
     definition: @sql char_length({{ title }});;
   }
 
+  dimension primary_anime_title {
+    label: 'Primary anime title'
+    type: 'text'
+    definition: @sql 
+      case 
+        when {{ title_type }} = 'primary' then {{ title }} 
+        else null 
+      end
+    ;;
+  }
+
+  dimension ja_anime_title {
+    label: 'Ja anime title'
+    type: 'text'
+    definition: @sql 
+      case 
+        when  {{ title_type }} = 'official' and {{ language }} = 'ja' then {{ title }} 
+        else null 
+      end
+    ;;
+  }
+
 
   owner: 'admin@domain.com'
   table_name: '"public"."anime_titles"'
