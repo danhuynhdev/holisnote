@@ -14,49 +14,19 @@ public_anime_titles
 ```
 
 ```aml
-// Download this dataset and import with data modeling import to anime_title table
-// https://file.io/qEUZCtQfXUou
+// import with https://file.io/7M3oFxvfUuZf
+// choose number of uid
 
-Model public_anime_titles {
+Model public_myanimelist {
   type: 'table'
-  label: 'Anime Titles'
+  label: 'Myanimelist'
   description: ''
   data_source_name: 'development'
-  dimension aid {
-    label: 'Aid'
+  dimension uid {
+    label: 'Uid'
     type: 'number'
     hidden: false
-    definition: @sql {{ #SOURCE.aid }};;
-  }
-  dimension type {
-    label: 'Type'
-    type: 'text'
-    hidden: false
-    description: '''
-      type: 1=primary title (one per anime), 2=synonyms (multiple per anime), 3=shorttitles (multiple per anime), 4=official title (one per language)
-    '''
-    definition: @sql {{ #SOURCE.type }};;
-  }
-  dimension title_type {
-    label: 'Title Type'
-    type: 'text'
-    description: 'human readable version of {{ type }}'
-    definition: @sql 
-      CASE
-        WHEN {{ #SOURCE.type }} = '1' THEN 'primary'
-        WHEN {{ #SOURCE.type }} = '2' THEN 'synonyms'
-        WHEN {{ #SOURCE.type }} = '3' THEN 'shorttitles'
-        WHEN {{ #SOURCE.type }} = '4' THEN 'official'
-      END
-    ;;
-  }
-
-  dimension language {
-    label: 'Language'
-    type: 'text'
-    hidden: false
-    
-    definition: @sql {{ #SOURCE.language }};;
+    definition: @sql {{ #SOURCE.uid }};;
   }
   dimension title {
     label: 'Title'
@@ -65,15 +35,93 @@ Model public_anime_titles {
     definition: @sql {{ #SOURCE.title }};;
   }
 
-  dimension tilte_length {
-    label: 'Title length'
+  dimension title_length {
+    label: 'Title Length'
     type: 'number'
+    hidden: false
     definition: @sql char_length({{ title }});;
   }
 
+  dimension synopsis {
+    label: 'Synopsis'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.synopsis }};;
+  }
+  dimension genre {
+    label: 'Genre'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.genre }};;
+  }
+  dimension aired {
+    label: 'Aired'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.aired }};;
+  }
+  dimension aired_date {
+    label: 'Aired Date'
+    type: 'date'
+    hidden: false
+    definition: @sql 
+      CASE 
+        WHEN {{ #SOURCE.aired_date }} = '' THEN NULL
+        ELSE DATE({{ #SOURCE.aired_date }})
+      END
+    ;;
+  }
+  dimension year {
+    label: 'Year'
+    type: 'number'
+    hidden: false
+    definition: @sql DATE_PART('year', {{ aired_date }})::INTEGER ;;
+  }
+  dimension episodes {
+    label: 'Episodes'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.episodes }};;
+  }
+  dimension members {
+    label: 'Members'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.members }};;
+  }
+  dimension popularity {
+    label: 'Popularity'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.popularity }};;
+  }
+  dimension ranked {
+    label: 'Ranked'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.ranked }};;
+  }
+  dimension score {
+    label: 'Score'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.score }};;
+  }
+  dimension img_url {
+    label: 'Img Url'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.img_url }};;
+  }
+  dimension link {
+    label: 'Link'
+    type: 'text'
+    hidden: false
+    definition: @sql {{ #SOURCE.link }};;
+  }
 
   owner: 'admin@domain.com'
-  table_name: '"public"."anime_titles"'
+  table_name: '"public"."myanimelist"'
 }
 ```
 
