@@ -1,7 +1,6 @@
 ---
-title: "Are anime titles getting longer?"
-description: |
-  A quick exploratory analysis on the length of anime titles. 
+title: Are anime title getting longer
+description: A quick exploratory analysis on the length of anime titles.
 author: Emi Tanaka
 publication_date: Jan. 15, 2022
 ---
@@ -9,27 +8,55 @@ publication_date: Jan. 15, 2022
 [AniDB](https://anidb.net/) is a website that hosts extensive information on
 anime from China, Japan and Korea. 
 
-
 ```aml
 import './public_anime_titles.model.aml' { public_anime_titles }
 public_anime_titles
 ```
 
-
 ```aml
-// import with https://file.io/7M3oFxvfUuZf
-// choose number of uid
+// Download this dataset and import with data modeling import to anime_title table
+// https://file.io/qEUZCtQfXUou
 
-Model public_myanimelist {
+Model public_anime_titles {
   type: 'table'
-  label: 'Myanimelist'
+  label: 'Anime Titles'
   description: ''
   data_source_name: 'development'
-  dimension uid {
-    label: 'Uid'
+  dimension aid {
+    label: 'Aid'
     type: 'number'
     hidden: false
-    definition: @sql {{ #SOURCE.uid }};;
+    definition: @sql {{ #SOURCE.aid }};;
+  }
+  dimension type {
+    label: 'Type'
+    type: 'text'
+    hidden: false
+    description: '''
+      type: 1=primary title (one per anime), 2=synonyms (multiple per anime), 3=shorttitles (multiple per anime), 4=official title (one per language)
+    '''
+    definition: @sql {{ #SOURCE.type }};;
+  }
+  dimension title_type {
+    label: 'Title Type'
+    type: 'text'
+    description: 'human readable version of {{ type }}'
+    definition: @sql 
+      CASE
+        WHEN {{ #SOURCE.type }} = '1' THEN 'primary'
+        WHEN {{ #SOURCE.type }} = '2' THEN 'synonyms'
+        WHEN {{ #SOURCE.type }} = '3' THEN 'shorttitles'
+        WHEN {{ #SOURCE.type }} = '4' THEN 'official'
+      END
+    ;;
+  }
+
+  dimension language {
+    label: 'Language'
+    type: 'text'
+    hidden: false
+    
+    definition: @sql {{ #SOURCE.language }};;
   }
   dimension title {
     label: 'Title'
@@ -38,96 +65,17 @@ Model public_myanimelist {
     definition: @sql {{ #SOURCE.title }};;
   }
 
-  dimension title_length {
-    label: 'Title Length'
+  dimension tilte_length {
+    label: 'Title length'
     type: 'number'
-    hidden: false
     definition: @sql char_length({{ title }});;
   }
 
-  dimension synopsis {
-    label: 'Synopsis'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.synopsis }};;
-  }
-  dimension genre {
-    label: 'Genre'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.genre }};;
-  }
-  dimension aired {
-    label: 'Aired'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.aired }};;
-  }
-  dimension aired_date {
-    label: 'Aired Date'
-    type: 'date'
-    hidden: false
-    definition: @sql 
-      CASE 
-        WHEN {{ #SOURCE.aired_date }} = '' THEN NULL
-        ELSE DATE({{ #SOURCE.aired_date }})
-      END
-    ;;
-  }
-  dimension year {
-    label: 'Year'
-    type: 'number'
-    hidden: false
-    definition: @sql DATE_PART('year', {{ aired_date }})::INTEGER ;;
-  }
-  dimension episodes {
-    label: 'Episodes'
-    type: 'number'
-    hidden: false
-    definition: @sql {{ #SOURCE.episodes }};;
-  }
-  dimension members {
-    label: 'Members'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.members }};;
-  }
-  dimension popularity {
-    label: 'Popularity'
-    type: 'number'
-    hidden: false
-    definition: @sql {{ #SOURCE.popularity }};;
-  }
-  dimension ranked {
-    label: 'Ranked'
-    type: 'number'
-    hidden: false
-    definition: @sql {{ #SOURCE.ranked }};;
-  }
-  dimension score {
-    label: 'Score'
-    type: 'number'
-    hidden: false
-    definition: @sql {{ #SOURCE.score }};;
-  }
-  dimension img_url {
-    label: 'Img Url'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.img_url }};;
-  }
-  dimension link {
-    label: 'Link'
-    type: 'text'
-    hidden: false
-    definition: @sql {{ #SOURCE.link }};;
-  }
 
   owner: 'admin@domain.com'
-  table_name: '"public"."myanimelist"'
+  table_name: '"public"."anime_titles"'
 }
 ```
-
 
 ```aml
 Dataset anime_dataset {
@@ -148,7 +96,6 @@ There are currently information on ** `aml count(public_anime_titles.primary_ani
 of which `aml (count(public_anime_titles.ja_anime_title) * 100)/ count(public_anime_titles.primary_anime_title)`% originated from Japan.
 
 <!-- break_markdown -->
-
 As an anime lover, I've watched over 700 anime (which is still less than 5% in
 the whole database!) but one thing I noticed over recent years is that some
 anime titles are bizzarely long... or more like anime titles are becoming
@@ -219,7 +166,6 @@ The five longest titles from longest to shortest are:
 {"data_set_id":"anime_dataset","viz_type":"data_table","fields":{"table_fields":[{"path_hash":{"field_name":"title","model_id":"public_anime_titles"},"type":"text","format":{"type":"string","sub_type":"string"}},{"path_hash":{"field_name":"tilte_length","model_id":"public_anime_titles"},"type":"number","format":{"type":"number","format":{"pattern":"inherited"}}}]},"settings":{"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"conditional_formatting":[],"aggregation":{"show_total":false,"show_average":false},"others":{"include_empty_children_rows":false},"quick_pivot":false,"sort":[{"column":1,"sortOrder":false}],"pop_settings":null},"format":{},"filters":[{"operator":"is","values":["primary"],"modifier":null,"options":null,"path_hash":{"model_id":"public_anime_titles","field_name":"title_type"},"aggregation":null,"label":"Adhoc filter","dynamic_filter_id":null},{"operator":"top","values":[5],"modifier":{"logic":"standard","aggregation":"max","field_name":"tilte_length","model_id":"public_anime_titles","label":"Title length"},"options":null,"path_hash":{"model_id":"public_anime_titles","field_name":"title"},"aggregation":null,"label":"Adhoc filter","dynamic_filter_id":null}],"adhoc_fields":[]}
 ;;
 ```
-
 
 <!-- break_markdown -->
 

@@ -1,3 +1,4 @@
+<!-- break_markdown -->
 <!-- ---
 title: "Would seeing Spider-Man: No Way Home decrease COVID-19 Cases?"
 --- -->
@@ -19,6 +20,8 @@ and put them in `spiderman.csv` (if you want to code along, you can do the same!
 My .csv has two columns: `date` and `domestic_box_office`) and US COVID-19 cases
 from the [NY Times GitHub repository](https://github.com/nytimes/covid-19-data). 
 Here's a little code-along.
+
+
 
 ```aml
 Model dates_model {
@@ -70,10 +73,15 @@ Model dates_model {
   ]
 }
 ```
+
+
+<!-- break_markdown -->
 ![image](https://user-images.githubusercontent.com/17341000/173999545-ad885009-4f04-4099-88da-6030e05e6a2b.png)
 
 
-```r
+
+
+```aml
 library(tidyverse)
 
 spiderman <- read_csv("spiderman.csv",
@@ -91,7 +99,8 @@ d <- spiderman %>%
   left_join(cases)
 ```
 
-```r
+
+```aml
 library(tidyverse)
 
 spiderman <- read_csv("../../static/data/spiderman.csv",
@@ -110,6 +119,9 @@ d <- spiderman %>%
 ```
 
 
+<!-- break_markdown -->
+
+
 Now, let's look at the relationship between daily domestic box office and new COVID-19 cases in the US.
 
 <span class = "marginnote">
@@ -117,9 +129,14 @@ Warning: The following is a very silly analysis. It is a joke. Please do not try
 </span>
 
 
-```r
+
+
+```aml
 lm(case ~ domestic_box_office, data = d)
 ```
+
+
+<!-- break_markdown -->
 
 Oh my heavens! Not only does it not look like ticket sales for Spider-Man: No
 Way Home are increasing COVID-19 cases...it looks like the *opposite*. According
@@ -132,7 +149,9 @@ silly analysis, let's do something horrible, shall we? A double y-axis!
 I just learned about the [geomtextpath](https://github.com/AllanCameron/geomtextpath) package from @timelyportfolio on [Twitter](https://twitter.com/timelyportfolio/status/1469683836107866120), it's amazing!
 </span>
 
-```r
+
+
+```aml
 library(geomtextpath)
 
 
@@ -160,10 +179,15 @@ d %>%
   scale_x_date("Date", limits = c(as.Date("2021-12-07"), NA))
 ```
 
+
+<!-- break_markdown -->
+
 The actual SNL sketch claimed there was a one week lag -- that Spider-Man sales
 a week ago caused cases 7 days later. Let's check that too!
 
-```r
+
+
+```aml
 cases <- cases %>%
   mutate(case_lag = lead(case, 7)) 
 
@@ -191,6 +215,9 @@ spiderman %>%
   labs(caption = "@LucyStats")  +
   scale_x_date("Date", limits = c(as.Date("2021-12-07"), NA))
 ```
+
+
+<!-- break_markdown -->
 
 Well there you have it. It looks like SNL was onto something, but got it
 backwards! Just kidding.
