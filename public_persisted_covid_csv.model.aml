@@ -1,0 +1,27 @@
+Model covid {
+  type: 'table'
+  label: 'Persisted Covid Csv'
+  description: ''
+  data_source_name: 'development'
+  dimension date {
+    label: 'Date'
+    type: 'date'
+    hidden: false
+    definition: @sql {{ #SOURCE.date }};;
+  }
+  dimension cases {
+    label: 'Cases'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.cases }};;
+  }
+  dimension deaths {
+    label: 'Deaths'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.deaths }};;
+  }
+
+  owner: 'admin@domain.com'
+  table_name: '"public"."persisted_covid_csv"'
+}

@@ -1,0 +1,33 @@
+import './public_persisted_covid_csv.model.aml' {
+  covid 
+}
+import './public_persisted_boxoffice_csv11.model.aml' {
+  boxoffice
+}
+
+Dataset covid_spiderman {
+  label: 'Covid Spiderman'
+  description: ''
+  data_source_name: 'development'
+  models: [
+    covid,
+    boxoffice
+  ]
+  relationships: [
+    RelationshipConfig {
+      rel: Relationship {
+        type: 'many_to_one'
+        to: FieldRef {
+          model: 'covid'
+          field: 'date'
+        }
+        from: FieldRef {
+          model: 'boxoffice'
+          field: 'date'
+        }
+      }
+      active: true
+    }
+  ]
+  owner: 'admin@domain.com'
+}

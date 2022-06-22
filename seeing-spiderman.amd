@@ -2,6 +2,9 @@
 title: "Would seeing Spider-Man: No Way Home decrease COVID-19 Cases?"
 ---
 
+
+<!-- break_markdown -->
+
 In SNL's cold open last night, "President Joe Biden" suggested that the COVID-19
 surge we are seeing in the US is due to people seeing Spider-Man: No Way Home.
 If people would just stop seeing this film, he argues, cases will go back down!
@@ -21,98 +24,88 @@ Here's a little code-along.
 
 
 ```aml
-Model dates_model {
-  type: 'query'
-  label: 'dates_model'
+Model boxoffice {
+  type: 'table'
+  label: 'Persisted Boxoffice Csv11'
   description: ''
   data_source_name: 'development'
-
-  dimension date_d {
-    label: 'Date D'
-    type: 'datetime'
+  dimension date {
+    label: 'Date'
+    type: 'date'
     hidden: false
-    definition: @sql {{ #SOURCE.date_d }};;
+    definition: @sql {{ #SOURCE.date }};;
+  }
+  dimension domestic_box_office {
+    label: 'Domestic Box Office'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.domestic_box_office }};;
   }
 
-  measure min_date {
-    label: 'min date'
-    type: 'datetime'
-    definition: @sql {{ #SOURCE.date_d }};;
-    aggregation_type: 'min'
-  }
-
-  // measure max_date {
-  //   label: 'max date'
-  //   type: 'datetime'
-  //   definition: @sql {{ #SOURCE.date_d }};;
-  //   aggregation_type: 'max'
-  // }
-
-  owner: 'tan.huynh@holistics.io'
-  query: @sql
-    SELECT
-      *
-    FROM generate_series (
-      '2017-01-01'::date,
-      '2024-01-01'::date,
-      '2 day'::interval
-    ) date_d
-    UNION
-    SELECT
-      *
-    FROM generate_series (
-      '2024-01-01'::date,
-      '2025-01-01'::date,
-      '1 day'::interval
-    ) date_d
-  ;;
-  models: [
-  ]
+  owner: 'admin@domain.com'
+  table_name: '"public"."persisted_boxoffice_csv11"'
 }
 ```
 
 
-<!-- break_markdown -->
-![image](https://user-images.githubusercontent.com/17341000/173999545-ad885009-4f04-4099-88da-6030e05e6a2b.png)
-
-
-
-
 ```aml
-library(tidyverse)
+Model covid {
+  type: 'table'
+  label: 'Persisted Covid Csv'
+  description: ''
+  data_source_name: 'development'
+  dimension date {
+    label: 'Date'
+    type: 'date'
+    hidden: false
+    definition: @sql {{ #SOURCE.date }};;
+  }
+  dimension cases {
+    label: 'Cases'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.cases }};;
+  }
+  dimension deaths {
+    label: 'Deaths'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.deaths }};;
+  }
 
-spiderman <- read_csv("spiderman.csv",
-                      col_types = cols(
-                        date = col_date(format = "%m/%d/%y"),
-                        domestic_box_office = col_double()
-                      ))
-cases <- read_csv("https://github.com/nytimes/covid-19-data/raw/master/us.csv")
-
-# get daily cases from cumulative cases
-cases <- cases %>%
-  mutate(case = c(cases[1], diff(cases)))
-
-d <- spiderman %>%
-  left_join(cases)
+  owner: 'admin@domain.com'
+  table_name: '"public"."persisted_covid_csv"'
+}
 ```
 
 
 ```aml
-library(tidyverse)
-
-spiderman <- read_csv("../../static/data/spiderman.csv",
-                      col_types = cols(
-                        date = col_date(format = "%m/%d/%y"),
-                        domestic_box_office = col_double()
-                      ))
-cases <- read_csv("https://github.com/nytimes/covid-19-data/raw/master/us.csv")
-
-# get daily cases from cumulative cases
-cases <- cases %>%
-  mutate(case = c(cases[1], diff(cases)))
-
-d <- spiderman %>%
-  left_join(cases)
+Dataset covid_spiderman {
+  label: 'Covid Spiderman'
+  description: ''
+  data_source_name: 'development'
+  models: [
+    covid,
+    boxoffice
+  ]
+  relationships: [
+    RelationshipConfig {
+      rel: Relationship {
+        type: 'many_to_one'
+        to: FieldRef {
+          model: 'covid'
+          field: 'date'
+        }
+        from: FieldRef {
+          model: 'boxoffice'
+          field: 'date'
+        }
+      }
+      active: true
+    }
+  ]
+  owner: 'admin@domain.com'
+}
 ```
 
 
@@ -121,19 +114,46 @@ d <- spiderman %>%
 
 Now, let's look at the relationship between daily domestic box office and new COVID-19 cases in the US.
 
-<span class = "marginnote">
-Warning: The following is a very silly analysis. It is a joke. Please do not try at home!
-</span>
-
-
 
 
 ```aml
-lm(case ~ domestic_box_office, data = d)
+Model corr {
+  type: 'query'
+  label: 'Corr'
+  description: ''
+  data_source_name: 'development'
+
+  measure coef {
+    label: 'Coef'
+    type: 'number'
+    hidden: false
+    definition: @sql MAX({{ #SOURCE.coef }});;
+  }
+
+  owner: 'admin@domain.com'
+  query: @sql 
+    SELECT
+      corr(cases, boxoffice) as coef
+    FROM(
+    SELECT
+        {{ #b.date }} as date,
+        SUM({{ #c.cases }}) AS cases,
+        SUM({{ #b.domestic_box_office }}) as boxoffice
+    FROM
+        {{ #boxoffice b }} 
+        INNER JOIN {{ #covid c }} on {{ #c.date }} = {{ #b.date }} 
+    GROUP BY 1) as a
+  ;;
+
+  models: [covid, boxoffice]
+}
 ```
 
 
 <!-- break_markdown -->
+
+The coefficients: `aml corr.coef`
+
 
 Oh my heavens! Not only does it not look like ticket sales for Spider-Man: No
 Way Home are increasing COVID-19 cases...it looks like the *opposite*. According
@@ -142,38 +162,11 @@ sales results in a *decrease* of 3-4 COVID-19 cases! Pandemic solved! We just
 need to buy more Spider-Man: No Way Home tickets!! Since we're looking at a
 silly analysis, let's do something horrible, shall we? A double y-axis!
 
-<span class = "marginnote">
-I just learned about the [geomtextpath](https://github.com/AllanCameron/geomtextpath) package from @timelyportfolio on [Twitter](https://twitter.com/timelyportfolio/status/1469683836107866120), it's amazing!
-</span>
 
 
 
-```aml
-library(geomtextpath)
-
-
-d %>%
-  pivot_longer(cols = c(domestic_box_office, case)) %>%
-  filter(!is.na(value)) %>%
-  mutate(value = ifelse(name == "case", value * 120, value),
-         name = ifelse(name == "domestic_box_office", 
-                       "Spiderman daily domestic box office", 
-                       "US daily COVID-19 cases")) %>%
-  ggplot(aes(x = date, y = value, color = name)) +
-  geom_point(alpha = 0.2) +
-  geom_textsmooth(aes(label = name), hjust = 0.05,
-                  method = "loess", formula = y ~ x) +
-  scale_y_continuous("Spiderman Daily Domestic Box Office", 
-                     label = scales::dollar,
-                     sec.axis = sec_axis(
-                       ~ . / 120, 
-                       label = scales::comma, 
-                       name = "Daily new COVID-19 cases in the US")
-  ) +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  labs(caption = "@LucyStats")  +
-  scale_x_date("Date", limits = c(as.Date("2021-12-07"), NA))
+```viz
+{"data_set_id": "covid_spiderman", "viz_type":"combination_chart","fields":{"x_axis":{"path_hash":{"field_name":"date","model_id":"boxoffice"},"full_path":null,"transformation":null,"type":"date","format":{"type":"date","sub_type":"mmm dd yyyy"},"uuid":"c1027c2f-8a54-40e0-8e8c-7f6f3577f13a"},"series":{"path_hash":null,"format":null,"custom_label":null},"y_axes":[{"columns":[{"label":"Cases","path_hash":{"field_name":"cases","model_id":"covid"},"type":"number","uuid":"b82c7fdf-af3d-4530-80e8-4bdcb92a10e3","aggregation":"sum","format":{"type":"number","format":{"pattern":"inherited"}},"color":"auto","series_settings":{"series_hash":{},"palette_id":-2,"series_type":"line_chart"}}]},{"label":"Y Axis","columns":[{"label":"Domestic Box Office","path_hash":{"field_name":"domestic_box_office","model_id":"boxoffice"},"type":"number","uuid":"94a9e792-88ff-43b7-8570-cf5562a131eb","aggregation":"sum","format":{"type":"number","format":{"pattern":"inherited"}},"color":"auto","series_settings":{"series_hash":{},"palette_id":-2,"series_type":"line_chart"}}]}]},"settings":{"x_axis":{"title":null},"legend":{"enabled":true,"alignment":"bottom"},"y_axes":[{"title":null,"align":"left","scale_type":"logarithmic","min":null,"max":null,"show_data_label":false,"show_series_percentage":false,"stack_series":false,"stack_type":"normal","show_stack_total":false,"show_group_total":false,"group_long_tail":false,"maximum_groups":5},{"title":null,"align":"left","scale_type":"logarithmic","min":null,"max":null,"show_data_label":false,"show_series_percentage":false,"stack_series":false,"stack_type":"normal","show_stack_total":false,"show_group_total":false,"group_long_tail":false,"maximum_groups":5}],"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"quick_pivot":false,"sort":{},"pop_settings":null,"others":{"include_empty_children_rows":false}},"format":{},"filters":[{"operator":"matches","values":["dec 06 2021 - jan 01 2022"],"modifier":null,"options":null,"path_hash":{"model_id":"boxoffice","field_name":"date"},"aggregation":null,"label":"Adhoc filter","dynamic_filter_id":null}],"adhoc_fields":[]}
 ```
 
 
@@ -185,32 +178,68 @@ a week ago caused cases 7 days later. Let's check that too!
 
 
 ```aml
-cases <- cases %>%
-  mutate(case_lag = lead(case, 7)) 
+Model covid_adjusted {
+  type: 'table'
+  label: 'Adjusted Covid Csv'
+  description: ''
+  data_source_name: 'development'
+  dimension date {
+    label: 'Date'
+    type: 'date'
+    hidden: false
+    definition: @sql {{ #SOURCE.date }} - interval '7 day';;
+  }
+  dimension cases {
+    label: 'Cases'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.cases }};;
+  }
+  dimension deaths {
+    label: 'Deaths'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.deaths }};;
+  }
 
-spiderman %>%
-  left_join(cases) %>%
-  pivot_longer(cols = c(domestic_box_office, case_lag)) %>%
-  filter(!is.na(value)) %>%
-  mutate(value = ifelse(name == "case_lag", value * 120, value),
-         name = ifelse(name == "domestic_box_office", 
-                       "Spiderman daily domestic box office", 
-                       "US daily COVID-19 cases (7 days later)")) %>%
-  ggplot(aes(x = date, y = value, color = name)) +
-  geom_point(alpha = 0.2) +
-  geom_textsmooth(aes(label = name), hjust = .95,
-                  method = "loess", formula = y ~ x) +
-  scale_y_continuous("Spiderman Daily Domestic Box Office", 
-                     label = scales::dollar,
-                     sec.axis = sec_axis(
-                       ~ . / 120, 
-                       label = scales::comma, 
-                       name = "Daily new COVID-19 cases in the US (7 days later)")
-  ) +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  labs(caption = "@LucyStats")  +
-  scale_x_date("Date", limits = c(as.Date("2021-12-07"), NA))
+  owner: 'admin@domain.com'
+  table_name: '"public"."persisted_covid_csv"'
+}
+```
+
+
+```aml
+Dataset covid_spiderman_adjusted {
+  label: 'Covid Spiderman Adjusted'
+  description: ''
+  data_source_name: 'development'
+  models: [
+    covid_adjusted,
+    boxoffice
+  ]
+  relationships: [
+    RelationshipConfig {
+      rel: Relationship {
+        type: 'many_to_one'
+        to: FieldRef {
+          model: 'covid_adjusted'
+          field: 'date'
+        }
+        from: FieldRef {
+          model: 'boxoffice'
+          field: 'date'
+        }
+      }
+      active: true
+    }
+  ]
+  owner: 'admin@domain.com'
+}
+```
+
+
+```viz
+{"data_set_id": "covid_spiderman_adjusted", "viz_type":"combination_chart","fields":{"x_axis":{"path_hash":{"field_name":"date","model_id":"boxoffice"},"full_path":null,"transformation":null,"type":"date","format":{"type":"date","sub_type":"mmm dd yyyy"},"uuid":"c1027c2f-8a54-40e0-8e8c-7f6f3577f13a"},"series":{"path_hash":null,"format":null,"custom_label":null},"y_axes":[{"columns":[{"label":"Cases","path_hash":{"field_name":"cases","model_id":"covid_adjusted"},"type":"number","uuid":"b82c7fdf-af3d-4530-80e8-4bdcb92a10e3","aggregation":"sum","format":{"type":"number","format":{"pattern":"inherited"}},"color":"auto","series_settings":{"series_hash":{},"palette_id":-2,"series_type":"line_chart"}}]},{"label":"Y Axis","columns":[{"label":"Domestic Box Office","path_hash":{"field_name":"domestic_box_office","model_id":"boxoffice"},"type":"number","uuid":"94a9e792-88ff-43b7-8570-cf5562a131eb","aggregation":"sum","format":{"type":"number","format":{"pattern":"inherited"}},"color":"auto","series_settings":{"series_hash":{},"palette_id":-2,"series_type":"line_chart"}}]}]},"settings":{"x_axis":{"title":null},"legend":{"enabled":true,"alignment":"bottom"},"y_axes":[{"title":null,"align":"left","scale_type":"logarithmic","min":null,"max":null,"show_data_label":false,"show_series_percentage":false,"stack_series":false,"stack_type":"normal","show_stack_total":false,"show_group_total":false,"group_long_tail":false,"maximum_groups":5},{"title":null,"align":"left","scale_type":"logarithmic","min":null,"max":null,"show_data_label":false,"show_series_percentage":false,"stack_series":false,"stack_type":"normal","show_stack_total":false,"show_group_total":false,"group_long_tail":false,"maximum_groups":5}],"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"quick_pivot":false,"sort":{},"pop_settings":null,"others":{"include_empty_children_rows":false}},"format":{},"filters":[{"operator":"matches","values":["dec 06 2021 - jan 01 2022"],"modifier":null,"options":null,"path_hash":{"model_id":"boxoffice","field_name":"date"},"aggregation":null,"label":"Adhoc filter","dynamic_filter_id":null}],"adhoc_fields":[]}
 ```
 
 

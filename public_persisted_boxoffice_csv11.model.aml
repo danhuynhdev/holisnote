@@ -1,0 +1,21 @@
+Model boxoffice {
+  type: 'table'
+  label: 'Persisted Boxoffice Csv11'
+  description: ''
+  data_source_name: 'development'
+  dimension date {
+    label: 'Date'
+    type: 'date'
+    hidden: false
+    definition: @sql {{ #SOURCE.date }};;
+  }
+  dimension domestic_box_office {
+    label: 'Domestic Box Office'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.domestic_box_office }};;
+  }
+
+  owner: 'admin@domain.com'
+  table_name: '"public"."persisted_boxoffice_csv11"'
+}
