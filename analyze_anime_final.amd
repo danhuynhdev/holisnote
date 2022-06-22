@@ -228,19 +228,10 @@ The five longest titles from longest to shortest are:
 
 
 <!-- break_markdown -->
-Because of AniDB's limit on API call (multiple requests can get you banned
-easily -- turns out that the limit is quite small; about 13-14 calls already got
-me banned...), I'm going to use myanimelist for this.
-
-This figure suggest that super long titles are more common in
+Because of AniDB don't have release date for the anime, I'm going to use myanimelist for this. This figure suggest that super long titles are more common in
 the last decade than in the past.
 
 
 ```viz
 {"data_set_id":"anime_dataset","viz_type":"line_chart","fields":{"x_axis":{"label":"Aired Date","path_hash":{"field_name":"aired_date","model_id":"public_myanimelist"},"type":"date","uuid":"76f9730d-bfac-4c08-b386-8d0ada789f23","transformation":"datetrunc year","format":{"type":"date","sub_type":"yyyy"},"aggregation":null},"series":{"path_hash":null,"format":null,"custom_label":null},"y_axes":[{"columns":[{"label":"Title Length","path_hash":{"field_name":"title_length","model_id":"public_myanimelist"},"type":"auto","uuid":"bcc8b03c-2baa-4dd2-9cfc-773a43f25edb","aggregation":"max","format":{"type":"number","format":{"pattern":"inherited"}},"color":"auto","series_settings":{"series_hash":{},"palette_id":-2,"series_type":"auto"},"transformation":null}]}]},"settings":{"x_axis":{"title":null},"legend":{"enabled":true,"alignment":"bottom"},"y_axes":[{"title":null,"align":"left","scale_type":"linear","min":null,"max":null,"show_data_label":false,"show_series_percentage":false,"stack_series":false,"stack_type":"normal","show_stack_total":false,"show_group_total":false,"group_long_tail":false,"maximum_groups":5}],"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"quick_pivot":false,"sort":{},"pop_settings":null,"others":{"include_empty_children_rows":false}},"format":{},"filters":[{"operator":"not_null","values":[],"modifier":null,"options":null,"path_hash":{"model_id":"public_myanimelist","field_name":"aired_date"},"aggregation":null,"label":"Adhoc filter","dynamic_filter_id":null}],"adhoc_fields":[]}
-```
-
-
-```viz
-{"id":-19,"viz_type":"data_table","fields":{"table_fields":[{"path_hash":{"field_name":"en_title","model_id":"eva"},"type":"text","uuid":"3ad9f1d4-a285-4c32-a0bd-27b6523d2252","format":{"type":"string","sub_type":"string"}},{"path_hash":{"field_name":"ja_title","model_id":"eva"},"type":"text","uuid":"cf5e3a1a-a0db-48b3-a1e8-94864ee527ad","format":{"type":"string","sub_type":"string"}},{"path_hash":{"field_name":"primary_title","model_id":"eva"},"type":"text","uuid":"424f9442-fae1-41dc-97f8-605868af1bec","format":{"type":"string","sub_type":"string"}}]},"settings":{"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"conditional_formatting":[],"aggregation":{"show_total":false,"show_average":false},"others":{"include_empty_children_rows":false},"quick_pivot":false,"sort":{},"pop_settings":null},"format":{},"filters":[],"adhoc_fields":[],"data_set_id":"eva","data_model_id":"eva"}
 ```

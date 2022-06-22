@@ -1,5 +1,5 @@
 ---
-title: Are anime title getting longer
+title: Are anime title insanely long?
 description: A quick exploratory analysis on the length of anime titles.
 author: Emi Tanaka
 publication_date: Jan. 15, 2022
@@ -150,60 +150,6 @@ Dataset anime_dataset {
 There are currently information on ** `aml count(public_anime_titles.primary_anime_title)` anime** 
 of which `aml (count(public_anime_titles.ja_anime_title) * 100)/ count(public_anime_titles.primary_anime_title)`% originated from Japan.
 
-
-<!-- break_markdown -->
-As an anime lover, I've watched over 700 anime (which is still less than 5% in
-the whole database!) but one thing I noticed over recent years is that some
-anime titles are bizzarely long... or more like anime titles are becoming
-sentences. To explore this, I decided to use the
-[`anidb`](https://github.com/emitanaka/anidb) database to look at the data.
-
-First note that anime titles come in many forms.  For example,
-
-
-```aml
-Model eva {
-  type: 'query'
-  data_source_name: 'development'
-  query: @sql 
-    select 
-      (select {{ #a.title }} ja_title from {{ #public_anime_titles a }} where {{ #a.aid }} = 22 and {{ #a.title_type }} = 'official' and {{ #a.language }} = 'ja'),
-      (select {{ #a.title }} primary_title from {{ #public_anime_titles a }} where {{ #a.aid }} = 22 and {{ #a.title_type }} = 'primary'),
-      (select {{ #a.title }} en_title from {{ #public_anime_titles a }} where {{ #a.aid }} = 22 and {{ #a.title_type }} = 'official' and {{ #a.language }} = 'en')
-  ;;
-
-  dimension ja_title {
-    label: 'Ja Title'
-    type: 'text'
-    definition: @sql {{ #SOURCE.ja_title }} ;;
-  }
-
-  dimension primary_title {
-    label: 'Primary Title'
-    type: 'text'
-    definition: @sql {{ #SOURCE.primary_title }} ;;
-  }
-
-  dimension en_title {
-    label: 'En Title'
-    type: 'text'
-    definition: @sql {{ #SOURCE.en_title }} ;;
-  }
-
-
-  models: [ public_anime_titles ]
-}
-```
-
-
-<!-- break_markdown -->
-* "`aml max(eva.ja_title)`" is the **Japanese title**,
-* "`aml max(eva.primary_title)`" is the **primary title** (the official title in
-  the country of origin but in romanized form), and
-* "`aml max(eva.en_title)`" is the **English title**. The English title may be
-  unavailable if the anime is not licensed for English audiences.
-In the following explorations, I use the primary title. 
-
 The following chart shows that the distribution of the primary title length. We can see 
 that most anime titles are less than 70 characters but there are some Japanese anime title 
 that are double this length. The top 25 animes have title length greater than 92
@@ -224,23 +170,4 @@ The five longest titles from longest to shortest are:
 
 ```viz
 {"data_set_id":"anime_dataset","viz_type":"data_table","fields":{"table_fields":[{"path_hash":{"field_name":"title","model_id":"public_anime_titles"},"type":"text","format":{"type":"string","sub_type":"string"}},{"path_hash":{"field_name":"tilte_length","model_id":"public_anime_titles"},"type":"number","format":{"type":"number","format":{"pattern":"inherited"}}}]},"settings":{"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"conditional_formatting":[],"aggregation":{"show_total":false,"show_average":false},"others":{"include_empty_children_rows":false},"quick_pivot":false,"sort":[{"column":1,"sortOrder":false}],"pop_settings":null},"format":{},"filters":[{"operator":"is","values":["primary"],"modifier":null,"options":null,"path_hash":{"model_id":"public_anime_titles","field_name":"title_type"},"aggregation":null,"label":"Adhoc filter","dynamic_filter_id":null},{"operator":"top","values":[5],"modifier":{"logic":"standard","aggregation":"max","field_name":"tilte_length","model_id":"public_anime_titles","label":"Title length"},"options":null,"path_hash":{"model_id":"public_anime_titles","field_name":"title"},"aggregation":null,"label":"Adhoc filter","dynamic_filter_id":null}],"adhoc_fields":[]}
-```
-
-
-<!-- break_markdown -->
-Because of AniDB's limit on API call (multiple requests can get you banned
-easily -- turns out that the limit is quite small; about 13-14 calls already got
-me banned...), I'm going to use myanimelist for this.
-
-This figure suggest that super long titles are more common in
-the last decade than in the past.
-
-
-```viz
-{"data_set_id":"anime_dataset","viz_type":"line_chart","fields":{"x_axis":{"label":"Aired Date","path_hash":{"field_name":"aired_date","model_id":"public_myanimelist"},"type":"date","uuid":"76f9730d-bfac-4c08-b386-8d0ada789f23","transformation":"datetrunc year","format":{"type":"date","sub_type":"yyyy"},"aggregation":null},"series":{"path_hash":null,"format":null,"custom_label":null},"y_axes":[{"columns":[{"label":"Title Length","path_hash":{"field_name":"title_length","model_id":"public_myanimelist"},"type":"auto","uuid":"bcc8b03c-2baa-4dd2-9cfc-773a43f25edb","aggregation":"max","format":{"type":"number","format":{"pattern":"inherited"}},"color":"auto","series_settings":{"series_hash":{},"palette_id":-2,"series_type":"auto"},"transformation":null}]}]},"settings":{"x_axis":{"title":null},"legend":{"enabled":true,"alignment":"bottom"},"y_axes":[{"title":null,"align":"left","scale_type":"linear","min":null,"max":null,"show_data_label":false,"show_series_percentage":false,"stack_series":false,"stack_type":"normal","show_stack_total":false,"show_group_total":false,"group_long_tail":false,"maximum_groups":5}],"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"quick_pivot":false,"sort":{},"pop_settings":null,"others":{"include_empty_children_rows":false}},"format":{},"filters":[{"operator":"not_null","values":[],"modifier":null,"options":null,"path_hash":{"model_id":"public_myanimelist","field_name":"aired_date"},"aggregation":null,"label":"Adhoc filter","dynamic_filter_id":null}],"adhoc_fields":[]}
-```
-
-
-```viz
-{"id":-19,"viz_type":"data_table","fields":{"table_fields":[{"path_hash":{"field_name":"en_title","model_id":"eva"},"type":"text","uuid":"3ad9f1d4-a285-4c32-a0bd-27b6523d2252","format":{"type":"string","sub_type":"string"}},{"path_hash":{"field_name":"ja_title","model_id":"eva"},"type":"text","uuid":"cf5e3a1a-a0db-48b3-a1e8-94864ee527ad","format":{"type":"string","sub_type":"string"}},{"path_hash":{"field_name":"primary_title","model_id":"eva"},"type":"text","uuid":"424f9442-fae1-41dc-97f8-605868af1bec","format":{"type":"string","sub_type":"string"}}]},"settings":{"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"conditional_formatting":[],"aggregation":{"show_total":false,"show_average":false},"others":{"include_empty_children_rows":false},"quick_pivot":false,"sort":{},"pop_settings":null},"format":{},"filters":[],"adhoc_fields":[],"data_set_id":"eva","data_model_id":"eva"}
 ```

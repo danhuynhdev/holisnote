@@ -1,0 +1,111 @@
+---
+title: Are anime title getting longer
+description: A quick exploratory analysis on the length of anime titles.
+author: Emi Tanaka
+publication_date: Jan. 15, 2022
+---
+
+
+<!-- break_markdown -->
+[AniDB](https://anidb.net/) is a website that hosts extensive information on
+anime from China, Japan and Korea.
+
+
+```aml
+import './public_anime_titles.model.aml' { public_anime_titles }
+public_anime_titles
+```
+
+
+```aml
+Dataset anime_dataset {
+  label: 'Anime Dataset'
+  description: ''
+  data_source_name: 'development'
+  models: [
+    public_anime_titles,
+  ]
+  relationships: [
+  ]
+  owner: 'admin@domain.com'
+}
+```
+
+
+<!-- break_markdown -->
+There are currently information on ** `aml count(public_anime_titles.primary_anime_title)` anime** 
+of which `aml (count(public_anime_titles.ja_anime_title) * 100)/ count(public_anime_titles.primary_anime_title)`% originated from Japan.
+
+
+```viz
+{"id":-1,"viz_type":"data_table","fields":{"table_fields":[{"path_hash":{"field_name":"aid","model_id":"public_anime_titles"},"type":"number","uuid":"f7cc6a13-0538-437a-a263-07d644091cc2","format":{"type":"number","format":{"pattern":"inherited"}}},{"path_hash":{"field_name":"language","model_id":"public_anime_titles"},"type":"text","uuid":"4e96cb9c-b93f-4ffd-9e55-c485c4245b13","format":{"type":"string","sub_type":"string"}},{"path_hash":{"field_name":"title","model_id":"public_anime_titles"},"type":"text","uuid":"92186186-28c5-4c2b-bdfe-2bfc4e5d773e","format":{"type":"string","sub_type":"string"}},{"path_hash":{"field_name":"tilte_length","model_id":"public_anime_titles"},"type":"number","uuid":"e518c373-c8ac-41d6-a2ab-209b641f490b","format":{"type":"number","format":{"pattern":"inherited"}}},{"path_hash":{"field_name":"title_type","model_id":"public_anime_titles"},"type":"text","uuid":"f98aaba1-33ff-4b5f-98da-5177ec4688d8","format":{"type":"string","sub_type":"string"}}]},"settings":{"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"conditional_formatting":[],"aggregation":{"show_total":false,"show_average":false},"others":{"include_empty_children_rows":false},"quick_pivot":false,"sort":{},"pop_settings":null},"format":{},"filters":[],"adhoc_fields":[],"data_set_id":"public_anime_titles","data_model_id":"public_anime_titles"}
+```
+
+
+<!-- break_markdown -->
+First note that anime titles come in many forms.  For example,
+
+
+```aml
+Model eva {
+  type: 'query'
+  data_source_name: 'development'
+  query: @sql 
+    select 
+      (select {{ #a.title }} ja_title from {{ #public_anime_titles a }} where {{ #a.aid }} = 22 and {{ #a.title_type }} = 'official' and {{ #a.language }} = 'ja'),
+      (select {{ #a.title }} primary_title from {{ #public_anime_titles a }} where {{ #a.aid }} = 22 and {{ #a.title_type }} = 'primary'),
+      (select {{ #a.title }} en_title from {{ #public_anime_titles a }} where {{ #a.aid }} = 22 and {{ #a.title_type }} = 'official' and {{ #a.language }} = 'en')
+  ;;
+
+  dimension ja_title {
+    label: 'Ja Title'
+    type: 'text'
+    definition: @sql {{ #SOURCE.ja_title }} ;;
+  }
+
+  dimension primary_title {
+    label: 'Primary Title'
+    type: 'text'
+    definition: @sql {{ #SOURCE.primary_title }} ;;
+  }
+
+  dimension en_title {
+    label: 'En Title'
+    type: 'text'
+    definition: @sql {{ #SOURCE.en_title }} ;;
+  }
+
+
+  models: [ public_anime_titles ]
+}
+```
+
+
+```viz
+{"id":-2,"viz_type":"data_table","fields":{"table_fields":[{"path_hash":{"field_name":"aid","model_id":"public_anime_titles"},"type":"number","uuid":"c200854a-0f03-48fb-88bd-8d84d7fbe646","format":{"type":"number","format":{"pattern":"inherited"}}},{"path_hash":{"field_name":"language","model_id":"public_anime_titles"},"type":"text","uuid":"6a10b627-fbe5-4da3-9ec6-329c93823ffd","format":{"type":"string","sub_type":"string"}},{"path_hash":{"field_name":"title","model_id":"public_anime_titles"},"type":"text","uuid":"c1165f8c-8af8-4bb7-a448-d9ce05c84196","format":{"type":"string","sub_type":"string"}},{"path_hash":{"field_name":"title_type","model_id":"public_anime_titles"},"type":"text","uuid":"defa6945-2e6c-4f68-8aef-d135c564acd0","format":{"type":"string","sub_type":"string"}}]},"settings":{"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"conditional_formatting":[],"aggregation":{"show_total":false,"show_average":false},"others":{"include_empty_children_rows":false},"quick_pivot":false,"sort":{},"pop_settings":null},"format":{},"filters":[{"path_hash":{"model_id":"public_anime_titles","field_name":"aid"},"aggregation":null,"operator":"is","modifier":null,"values":[22]}],"adhoc_fields":[],"data_set_id":"public_anime_titles","data_model_id":"public_anime_titles"}
+```
+
+
+<!-- break_markdown -->
+* "`aml max(eva.ja_title)`" is the **Japanese title**, denoted by the field `language` equals `en`
+* "`aml max(eva.primary_title)`" is the **primary title** (the official title in
+  the country of origin but in romanized form), denoted by the field `title_type` equals `primary`
+* "`aml max(eva.en_title)`" is the **English title**. The English title may be
+  unavailable if the anime is not licensed for English audiences.
+
+
+<!-- break_markdown -->
+The full list of title types are:
+
+
+```viz
+{"id":-2,"viz_type":"data_table","fields":{"table_fields":[{"path_hash":{"field_name":"title_type","model_id":"public_anime_titles"},"type":"text","uuid":"071ae47a-a694-407e-b5c8-ad5fef820b8d","format":{"type":"string","sub_type":"string"}},{"path_hash":{"field_name":"type","model_id":"public_anime_titles"},"type":"text","uuid":"866ed804-f27b-44fc-a4cd-a23f2087e8e0","format":{"type":"string","sub_type":"string"}}]},"settings":{"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"conditional_formatting":[],"aggregation":{"show_total":false,"show_average":false},"others":{"include_empty_children_rows":false},"quick_pivot":false,"sort":[{"column":1,"sortOrder":true}],"pop_settings":null},"format":{},"filters":[{"path_hash":{"model_id":"public_anime_titles","field_name":"title_type"},"aggregation":null,"values":[],"modifier":null,"operator":"not_null"}],"adhoc_fields":[],"data_set_id":"public_anime_titles","data_model_id":"public_anime_titles"}
+```
+
+
+<!-- break_markdown -->
+* There is only one primary title (enum 1) per anime
+* The synonyms (enum 2) is unofficial name from the communities (multiple per anime)
+* The shorttitles (enum 3) is the abbreviation in multiple languages  (multiple per anime)
+* The official title (enum 4) is the official name of the anime in each country it airs (one per language).
+  **Do not confuse it with the primary title**
