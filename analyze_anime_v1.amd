@@ -1,8 +1,6 @@
 ---
-title: Are anime title insanely long?
+title: Are anime title getting longer?
 description: A quick exploratory analysis on the length of anime titles.
-author: Emi Tanaka
-publication_date: Jan. 15, 2022
 ---
 
 
@@ -170,4 +168,9 @@ The five longest titles from longest to shortest are:
 
 ```viz
 {"data_set_id":"anime_dataset","viz_type":"data_table","fields":{"table_fields":[{"path_hash":{"field_name":"title","model_id":"public_anime_titles"},"type":"text","format":{"type":"string","sub_type":"string"}},{"path_hash":{"field_name":"tilte_length","model_id":"public_anime_titles"},"type":"number","format":{"type":"number","format":{"pattern":"inherited"}}}]},"settings":{"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"conditional_formatting":[],"aggregation":{"show_total":false,"show_average":false},"others":{"include_empty_children_rows":false},"quick_pivot":false,"sort":[{"column":1,"sortOrder":false}],"pop_settings":null},"format":{},"filters":[{"operator":"is","values":["primary"],"modifier":null,"options":null,"path_hash":{"model_id":"public_anime_titles","field_name":"title_type"},"aggregation":null,"label":"Adhoc filter","dynamic_filter_id":null},{"operator":"top","values":[5],"modifier":{"logic":"standard","aggregation":"max","field_name":"tilte_length","model_id":"public_anime_titles","label":"Title length"},"options":null,"path_hash":{"model_id":"public_anime_titles","field_name":"title"},"aggregation":null,"label":"Adhoc filter","dynamic_filter_id":null}],"adhoc_fields":[]}
+```
+
+
+```viz
+{"id":-19,"viz_type":"line_chart","fields":{"x_axis":{"label":"Aired Date","path_hash":{"field_name":"aired_date","model_id":"public_myanimelist"},"full_path":null,"transformation":"datetrunc year","type":"date","format":{"type":"date","sub_type":"yyyy"},"uuid":"4491e5b1-e2ca-46de-b071-24ea4d844638","aggregation":null},"series":{"path_hash":null,"format":null,"custom_label":null},"y_axes":[{"columns":[{"label":"Title Length","path_hash":{"field_name":"title_length","model_id":"public_myanimelist"},"type":"auto","uuid":"e1340a84-29b9-4304-89df-c10fc356f94c","aggregation":"max","format":{"type":"number","format":{"pattern":"inherited"}},"color":"auto","series_settings":{"series_hash":{},"palette_id":-2,"series_type":"auto"},"transformation":null}]}]},"settings":{"x_axis":{"title":null},"legend":{"enabled":true,"alignment":"bottom"},"y_axes":[{"title":null,"align":"left","scale_type":"linear","min":null,"max":null,"show_data_label":false,"show_series_percentage":false,"stack_series":false,"stack_type":"normal","show_stack_total":false,"show_group_total":false,"group_long_tail":false,"maximum_groups":5}],"misc":{"custom_color_list":[{}],"pagination_size":25,"show_row_number":true,"row_limit":-1},"quick_pivot":false,"sort":{},"pop_settings":null,"others":{"include_empty_children_rows":false}},"format":{},"filters":[{"path_hash":{"model_id":"public_myanimelist","field_name":"aired_date"},"aggregation":null,"values":[],"modifier":null,"operator":"not_null"}],"adhoc_fields":[],"data_set_id":"public_myanimelist","data_model_id":"public_myanimelist"} 
 ```
