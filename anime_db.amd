@@ -1,11 +1,3 @@
----
-title: Are anime title getting longer
-description: A quick exploratory analysis on the length of anime titles.
-author: Emi Tanaka
-publication_date: Jan. 15, 2022
----
-
-
 <!-- break_markdown -->
 [AniDB](https://anidb.net/) is a website that hosts extensive information on
 anime from China, Japan and Korea.
